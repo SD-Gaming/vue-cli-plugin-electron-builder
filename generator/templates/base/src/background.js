@@ -4,13 +4,15 @@ import { app, protocol, BrowserWindow } from 'electron'
 import { createProtocol } from 'vue-cli-plugin-electron-builder/lib'
 import installExtension, { VUEJS<% if (vue3) { %>3<%}%>_DEVTOOLS } from 'electron-devtools-installer'
 <% if (spectronSupport) { %>
+if (process.env.IS_TEST) {
 <% if (useTS) { %>
-import * as remote from '@electron/remote/main'
+  import * as remote from '@electron/remote/main'
 <% } %>
 <% if (!useTS) { %>
-const remote = require('@electron/remote/main')
+  const remote = require('@electron/remote/main')
 <% } %>
-remote.initialize()
+  remote.initialize()
+}
 <% } %>
 const isDevelopment = process.env.NODE_ENV !== 'production'
 
@@ -25,10 +27,6 @@ async function createWindow() {
     width: 800,
     height: 600,
     webPreferences: {
-      <% if (spectronSupport) { %>
-      // Required for Spectron testing
-      enableRemoteModule: !!process.env.IS_TEST,
-      <% } %>
       // Use pluginOptions.nodeIntegration, leave this alone
       // See nklayman.github.io/vue-cli-plugin-electron-builder/guide/security.html#node-integration for more info
       nodeIntegration: process.env.ELECTRON_NODE_INTEGRATION,
@@ -37,8 +35,10 @@ async function createWindow() {
   })
 
   <% if (spectronSupport) { %>
+  if (process.env.IS_TEST) {
   // Required for Spectron testing
-  remote.enable(win.webContents)
+    remote.enable(win.webContents)
+  }
   <% } %>
 
   if (process.env.WEBPACK_DEV_SERVER_URL) {
